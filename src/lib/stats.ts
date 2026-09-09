@@ -1,7 +1,9 @@
 import type { SimpleApp, ComplexApp } from './types'
 
-const PLAUSIBLE_BASE_URL = import.meta.env.PUBLIC_PLAUSIBLE_API_BASE_URL || 'https://plausible.imranr.dev'
-const PLAUSIBLE_SITE_ID = import.meta.env.PUBLIC_PLAUSIBLE_SITE_ID || 'apps.obtainium.imranr.dev'
+const env = import.meta.env || process.env
+const PLAUSIBLE_BASE_URL = env.PUBLIC_PLAUSIBLE_API_BASE_URL || ''
+const PLAUSIBLE_SITE_ID = env.PUBLIC_PLAUSIBLE_SITE_ID || ''
+export const hasLinkStats = () => Boolean(PLAUSIBLE_BASE_URL && PLAUSIBLE_SITE_ID)
 const CACHE_TTL_MS = 10 * 60 * 1000
 const RETRY_INTERVAL_MS = 5 * 60 * 1000
 const FETCH_TIMEOUT_MS = 15 * 1000
@@ -46,11 +48,12 @@ function decodeAppId(name: string): string | null {
 }
 
 /**
- * Get monthly install counts per app id (based on install link clicks tracked by Plausible).
+ * Get monthly link-click counts per app id (based on install link clicks tracked by Plausible).
  * Falls back to stale cache (or an empty object) if stats are unavailable, so callers
  * degrade gracefully. After a failure, retries are throttled to RETRY_INTERVAL_MS.
  */
 export const getInstallCounts = async (period = 'month'): Promise<Record<string, number>> => {
+  if (!hasLinkStats()) return {}
   if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS) {
     return cache.counts
   }
@@ -62,14 +65,14 @@ export const getInstallCounts = async (period = 'month'): Promise<Record<string,
   }
   pending = (async () => {
     try {
-      const counts: Record<string, number> = {}
+      const counts: Record<string, number> = Object.create(null)
       let page = 1
       while (true) {
         const rows = await fetchInstallRows(period, page)
         for (const row of rows) {
-          const id = decodeAppId(row.name)
+          const id = typeof row.name === 'string' ? decodeAppId(row.name) : null
           if (id) {
-            counts[id] = (counts[id] || 0) + (row.events || 0)
+            counts[id] = (counts[id] || 0) + (Number.isFinite(row.events) && row.events > 0 ? row.events : 0)
           }
         }
         if (rows.length < PAGE_LIMIT || page >= 10) {
@@ -99,5 +102,5 @@ export const getAppInstallCount = (
   counts: Record<string, number>,
 ): number => {
   const configs = app.type === 'simple' ? [app.config] : app.configs
-  return configs.reduce((sum, c) => sum + (counts[c.id] || 0), 0)
+  return [...new Set(configs.map(config => config.id))].reduce((sum, id) => sum + (Object.hasOwn(counts, id) ? counts[id] : 0), 0)
 }

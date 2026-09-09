@@ -7,33 +7,11 @@ interface Props {
   className?: string;
   style?: string;
 }
-const {
-  src,
-  alt,
-  width = 64,
-  height = 64,
-  className = "",
-  style = "",
-} = Astro.props;
+const { src, alt, width = 64, height = 64, className = "", style = "" } = Astro.props;
+const initials = alt.trim().split(/\s+/).slice(0, 2).map((part: string) => part.charAt(0)).join("").toUpperCase() || "?";
+const safeSource = src && /^https?:\/\//i.test(src) ? src : undefined;
 ---
-
-{
-  src ? (
-    <img
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      style={`width: ${width}px; height: ${height}px; min-width: ${width}px; min-height: ${height}px ${style}`}
-      class={`rounded-xl object-cover ${className}`}
-      loading="lazy"
-    />
-  ) : (
-    <div
-      class={`bg-surface-hover rounded-xl flex items-center justify-center ${className}`}
-      style={`width: ${width}px; height: ${height}px; min-width: ${width}px; min-height: ${height}px`}
-    >
-      <span class="text-text-muted ">…</span>
-    </div>
-  )
-}
+<span class={"app-icon " + className} style={"width:" + width + "px;height:" + height + "px;min-width:" + width + "px;" + style} aria-hidden="true">
+  {safeSource && <img src={safeSource} alt="" width={width} height={height} loading="lazy" referrerpolicy="no-referrer" onerror="this.setAttribute('hidden','');this.nextElementSibling.removeAttribute('hidden')" />}
+  <span class="icon-initials" hidden={Boolean(safeSource)}>{initials}</span>
+</span>

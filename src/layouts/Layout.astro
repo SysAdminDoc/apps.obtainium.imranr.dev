@@ -1,156 +1,96 @@
 ---
-import { getCurrentLanguage, getLocalizedStrings } from "../lib/i18n";
+import { getCurrentLanguage, getLocalizedStrings, localHref } from "../lib/i18n";
+import { version } from "../../package.json";
 import "../styles/global.css";
 
 const { title } = Astro.props;
 const currentLanguage = await getCurrentLanguage(Astro.url, Astro.request);
 const translations = getLocalizedStrings(currentLanguage);
-
-const siteTitle = title
-  ? `${title} | ${translations["title"]}`
-  : translations["title"];
-const siteDescription =
-  translations["subtitle"] || "Crowdsourced app configurations for Obtainium";
-
-const plausibleUrl =
-  import.meta.env.PUBLIC_PLAUSIBLE_URL ||
-  "https://plausible.imranr.dev/js/pa-hfruFX__Q49EFCqqzfuH3.js";
-const adsenseId =
-  import.meta.env.PUBLIC_ADSENSE_ID ||
-  "ca-pub-6629162404802829";
+const siteTitle = (title ? title + " | " : "") + translations.title + " | SysAdminDoc fork";
+const siteDescription = translations.catalogDescription;
+const canonical = new URL(Astro.url.pathname, Astro.url.origin);
+if (Astro.url.searchParams.has("lang")) canonical.searchParams.set("lang", currentLanguage);
 ---
-
 <!doctype html>
-<html class="h-full" lang={currentLanguage}>
+<html class="h-full" lang={currentLanguage} dir={["fa", "ar", "he"].includes(currentLanguage) ? "rtl" : "ltr"} data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{siteTitle}</title>
     <meta name="description" content={siteDescription} />
-    <meta name="theme-color" content="#6438B5" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1A0E4A" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#10131c" />
+    <meta name="referrer" content="no-referrer" />
     <meta property="og:title" content={siteTitle} />
     <meta property="og:description" content={siteDescription} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={Astro.url} />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content={siteTitle} />
-    <meta name="twitter:description" content={siteDescription} />
-    <link rel="canonical" href={Astro.url} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL("/social-card.png", Astro.url.origin)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
-    <link rel="dns-prefetch" href="https://keepandroidopen.org" />
-    <link rel="dns-prefetch" href="https://raw.githubusercontent.com" />
-    <script is:inline type="application/ld+json" set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: translations["title"],
-      description: siteDescription,
-      url: Astro.url.origin,
-    })}></script>
-    <noscript>
-      <style>
-        .jsonly {
-          display: none;
-        }
-      </style>
-    </noscript>
-    <!-- Privacy-friendly analytics by Plausible -->
-    <script async src={plausibleUrl}></script>
-    <script>
-      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-      plausible.init()
+    {Astro.url.pathname === "/redirect" && <meta name="robots" content="noindex, nofollow" />}
+    <script is:inline>
+      try { document.documentElement.dataset.theme = localStorage.getItem("catalog-theme") === "light" ? "light" : "dark"; } catch {}
     </script>
-    <script
-      is:inline
-      async
-      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
-      crossorigin="anonymous"></script>
+    <noscript><style>.jsonly, .app-icon img { display: none !important; } .app-icon .icon-initials[hidden] { display: flex !important; }</style></noscript>
   </head>
-  <body
-    class="text-text min-h-screen flex flex-col relative overflow-x-hidden"
-    style="font-family: 'Montserrat', system-ui, sans-serif;"
-  >
-    <header
-      class="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur-sm"
-    >
-      <div class="container mx-auto px-4 py-3">
-        <div class="flex justify-between items-center">
-          <div>
-            <h1>
-              <a
-                href="/"
-                class="text-lg font-bold text-text hover:text-primary-400 transition-colors"
-                >{translations["title"]}</a
-              >
-            </h1>
-             <h2 class="text-text-secondary font-semibold text-xs mt-0.5">
-              {translations["subtitle"]}
-            </h2>
-          </div>
-          <div class="flex items-center gap-4">
-            <nav class="flex space-x-4">
-              <a
-                href="https://wiki.obtainium.imranr.dev/"
-                target="_blank"
-                class="text-sm font-medium text-text-secondary hover:text-primary-500 transition-colors"
-                >{translations["about"]}</a
-              >
-              <a
-                href="https://github.com/ImranR98/apps.obtainium.imranr.dev/issues"
-                target="_blank"
-                class="text-sm font-medium text-text-secondary hover:text-primary-500 transition-colors"
-                >{translations["contribute"]}</a
-              >
-            </nav>
-          </div>
-        </div>
+  <body class="text-text min-h-screen flex flex-col">
+    <a href="#main-content" class="skip-link">{translations.skipContent}</a>
+    <header class="site-header">
+      <div class="container mx-auto px-5 py-4 header-inner">
+        <a href={localHref("/", currentLanguage)} class="site-brand">
+          <img src="/favicon.png" width="34" height="34" alt="" />
+          <span><strong>{translations.title}</strong><small>SysAdminDoc fork</small></span>
+        </a>
+        <nav class="site-nav" aria-label={translations.mainNavigation}>
+          <a href={localHref("/apps", currentLanguage)}>{translations.browseApps}</a>
+          <a href="https://wiki.obtainium.imranr.dev/" rel="noopener noreferrer">{translations.about}</a>
+          <a href="https://github.com/SysAdminDoc/apps.obtainium.imranr.dev" rel="noopener noreferrer">{translations.source}</a>
+          <button class="theme-button jsonly" type="button" data-theme-toggle data-light={translations.lightTheme} data-dark={translations.darkTheme}>{translations.lightTheme}</button>
+        </nav>
       </div>
     </header>
-
-    <main class="grow relative z-10">
-      <slot />
-    </main>
-
-    <footer class="border-t border-border py-4 mt-8">
-      <div class="container mx-auto px-4 text-center">
-        <a
-          class="text-xs text-text-subtle hover:text-primary-400 transition-colors"
-          href="https://github.com/ImranR98/apps.obtainium.imranr.dev"
-          target="_blank"
-        >
-          {translations["source"]}
-        </a>
+    <main id="main-content" class="grow"><slot /></main>
+    <footer class="site-footer">
+      <div class="container mx-auto px-5 footer-inner">
+        <p>Obtainium Apps v{version}<br /><span>{translations.forkNotice}</span></p>
+        <div>
+          <a href="https://github.com/ImranR98/apps.obtainium.imranr.dev">{translations.upstreamSource}</a>
+          <a href="https://apps.obtainium.imranr.dev/">{translations.officialCatalog}</a>
+          <a href="https://github.com/SysAdminDoc/apps.obtainium.imranr.dev/blob/main/LICENSE">GPL-3.0</a>
+        </div>
       </div>
     </footer>
-
-    <script is:inline async src="https://keepandroidopen.org/banner.js"></script>
+    <div id="copy-status" role="status" aria-live="polite" class="copy-status" hidden data-success={translations.copiedConfig} data-failure={translations.copyFailed}></div>
+    <script is:inline>
+      (() => {
+        const toggle = document.querySelector("[data-theme-toggle]");
+        const sync = () => { if (toggle) toggle.textContent = document.documentElement.dataset.theme === "light" ? toggle.dataset.dark : toggle.dataset.light; };
+        sync();
+        toggle?.addEventListener("click", () => {
+          const theme = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+          document.documentElement.dataset.theme = theme;
+          try { localStorage.setItem("catalog-theme", theme); } catch {}
+          sync();
+        });
+        let timer;
+        window.copyToClipboard = async (text) => {
+          const status = document.getElementById("copy-status");
+          if (!status) return;
+          clearTimeout(timer);
+          try {
+            if (!navigator.clipboard?.writeText) throw new Error("Clipboard is unavailable");
+            await navigator.clipboard.writeText(text);
+            status.textContent = status.dataset.success;
+            status.dataset.error = "false";
+          } catch {
+            status.textContent = status.dataset.failure;
+            status.dataset.error = "true";
+          }
+          status.hidden = false;
+          timer = setTimeout(() => { status.hidden = true; }, 6500);
+        };
+      })();
+    </script>
   </body>
 </html>
-
-<script is:inline>
-  (() => {
-    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-      anchor.addEventListener("click", function (e) {
-        const targetId = this.getAttribute("href");
-        if (targetId === "#") return;
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-          e.preventDefault();
-          targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
-    });
-  })();
-</script>

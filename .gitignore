@@ -1,4 +1,11 @@
 # build output
+CLAUDE.md
+CODEX_CHANGELOG.md
+.claude/
+release/
+.review/
+.env.*
+!.env.example
 dist/
 
 # generated types

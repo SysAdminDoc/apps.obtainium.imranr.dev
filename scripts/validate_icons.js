@@ -4,7 +4,8 @@ import sharp from 'sharp'
 const DATA_DIR = path.join(process.cwd(), 'public/data')
 const APPS_DIR = path.join(DATA_DIR, 'apps')
 
-const dryRun = process.argv.includes('--dry-run')
+const dryRun = !process.argv.includes('--write') || process.argv.includes('--dry-run')
+let failures = 0
 
 function getAllJsonFiles(dir) {
   const results = []
@@ -49,12 +50,14 @@ async function processFile(filePath) {
     data = JSON.parse(content)
   } catch (err) {
     console.error(`Invalid JSON in ${filePath}:`, err.message)
+    failures++
     return
   }
 
   if (data.icon) {
     const isValid = await validateIcon(data.icon)
     if (!isValid) {
+      failures++
       if (dryRun) {
         console.log(`[DRY RUN] Would update ${filePath}: icon set to null`)
       } else {
@@ -70,11 +73,15 @@ async function main() {
   const files = getAllJsonFiles(APPS_DIR)
   console.log(`Found ${files.length} JSON files`)
 
-  await Promise.all(files.map(f => processFile(f)))
+  let nextFile = 0
+  await Promise.all(Array.from({ length: 4 }, async () => {
+    while (nextFile < files.length) await processFile(files[nextFile++])
+  }))
   console.log('Validation complete')
   if (dryRun) {
-    console.log('Dry run completed - no files were modified')
+    console.log('Read-only check complete. No files were modified.')
   }
+  if (failures) process.exitCode = 1
 }
 
 main().catch(err => {

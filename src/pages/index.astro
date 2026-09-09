@@ -1,161 +1,59 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Icon from "../components/Icon.astro";
 import AppCard from "../components/AppCard.astro";
-import { getCategoriesWithRandomApps, getAppConfig } from "../lib/query";
+import { getCurrentLanguage, getLocalizedStrings, localHref } from "../lib/i18n";
 import { getApps } from "../lib/data";
+import { getAppConfig } from "../lib/query";
 import { getInstallCounts, getAppInstallCount } from "../lib/stats";
-import { getCurrentLanguage, getLocalizedStrings } from "../lib/i18n";
 
-Astro.response.headers.set('Cache-Control', 'public, max-age=600, s-maxage=1800');
-
-const allApps = getApps();
-const categoryApps = getCategoriesWithRandomApps(4);
-const categoryCounts: Record<string, number> = {};
-for (const app of allApps) {
-  for (const cat of app.categories) {
-    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1
-  }
-}
-const categories = Object.keys(categoryApps).sort((a, b) => (categoryCounts[b] || 0) - (categoryCounts[a] || 0));
-
-const installCounts = await getInstallCounts();
-const popularApps = [...allApps]
-  .filter((app) => getAppInstallCount(app, installCounts) > 0)
-  .sort((a, b) => getAppInstallCount(b, installCounts) - getAppInstallCount(a, installCounts))
-  .slice(0, 8);
-
+Astro.response.headers.set("Cache-Control", "public, max-age=600, s-maxage=1800");
+Astro.response.headers.set("Vary", "Accept-Language");
 const currentLanguage = await getCurrentLanguage(Astro.url, Astro.request);
 const translations = getLocalizedStrings(currentLanguage);
+const allApps = getApps();
+const categoryCounts = new Map<string, number>();
+for (const app of allApps) for (const category of app.categories) categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1);
+const categories = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+const examples = ["LocalSend", "CoMaps", "keepass2android", "Read You"].map(name => allApps.find(app => getAppConfig(app).some(config => config.name === name))).filter((app): app is (typeof allApps)[number] => Boolean(app));
+const installCounts = await getInstallCounts();
+const popularApps = allApps.filter(app => getAppInstallCount(app, installCounts) > 0).sort((a, b) => getAppInstallCount(b, installCounts) - getAppInstallCount(a, installCounts)).slice(0, 4);
 ---
-
 <Layout>
-  <div class="container mx-auto px-4 py-6">
-    <!-- All Apps tile -->
-    <div class="mb-8">
-      <a
-        href="/apps"
-        class="group relative block p-10 bg-surface border border-border rounded-3xl hover:border-primary-500 transition-all duration-300"
-      >
-        <div class="text-center relative">
-          <div class="mb-3">
-            <div
-              class="w-16 h-16 mx-auto bg-primary-50/80 rounded-2xl flex items-center justify-center"
-            >
-              <svg class="w-7 h-7 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128H6m12 0A2.25 2.25 0 0118.75 9v.878M6 6.878a2.25 2.25 0 00-.878.5L3.22 9.22a2.25 2.25 0 00-.47 2.372L4.5 18.5a2.25 2.25 0 002.121 1.5h10.758a2.25 2.25 0 002.121-1.5l1.748-6.908a2.25 2.25 0 00-.47-2.372l-1.902-1.842a2.25 2.25 0 00-.878-.5M6 6.878V6h12v.878" />
-              </svg>
-            </div>
-          </div>
-          <h2 class="text-xl font-semibold text-text mb-1">
-            {translations["allCategories"]}
-          </h2>
-          <p class="text-text-subtle text-xs mb-5">
-            {allApps.length} {translations["apps"] || "apps"}
-          </p>
-          <span
-            class="inline-flex items-center px-5 py-2.5 bg-primary-600 text-on-primary text-sm font-medium rounded-full hover:bg-primary-500 transition-colors duration-200"
-          >
-            {translations["browseAllApps"]}
-              <svg
-                class="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform duration-200"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 5l7 7-7 7"></path>
-              </svg>
-          </span>
-        </div>
-      </a>
-    </div>
-
-    {
-      popularApps.length > 0 && (
-        <div class="mb-8">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-text">
-              {translations["popular"]}
-            </h2>
-            <a
-              href="/apps?sort=popular"
-              class="text-xs text-text-muted hover:text-primary-500 transition-colors"
-            >
-              {translations["viewAll"]} &rarr;
-            </a>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
-            {popularApps.map((app) => (
-              <AppCard
-                app={app}
-                translations={translations}
-                currentLanguage={currentLanguage}
-                hideCategories={true}
-                installCount={getAppInstallCount(app, installCounts)}
-                compact={true}
-              />
-            ))}
-          </div>
-        </div>
-      )
-    }
-
-    <!-- Category tiles grid -->
-    <div class="mb-4">
-      <h2 class="text-lg font-semibold text-text">
-        {translations["categories"]}
-      </h2>
-    </div>
-    <div
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-    >
-      {
-        categories.map((cat: string) => (
-          <a
-            href={`/apps?category=${cat}`}
-            class="group relative block p-5 bg-surface border border-border rounded-3xl hover:border-primary-500 transition-all duration-300"
-          >
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-semibold text-text">
-                {translations[cat]}
-              </h3>
-              <div class="flex items-center gap-1.5">
-                <span class="text-xs text-text-subtle">{categoryCounts[cat]}</span>
-                <svg
-                  class="w-3.5 h-3.5 text-text-subtle group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all duration-200"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              {categoryApps[cat].map((app) => (
-                <Icon
-                  src={app.icon}
-                  alt={getAppConfig(app)[0].name}
-                  width={32}
-                  height={32}
-                  className="rounded-xl opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                />
-              ))}
-            </div>
-          </a>
-        ))
-      }
-    </div>
+  <div class="container mx-auto px-5 py-8">
+    <section class="catalog-hero">
+      <div class="hero-copy">
+        <p class="eyebrow">{translations.communityCatalog}</p>
+        <h1>{translations.heroTitle}</h1>
+        <p class="hero-description">{translations.catalogDescription}</p>
+        <form action="/apps" method="get" role="search" class="hero-search">
+          <input type="hidden" name="lang" value={currentLanguage} />
+          <label class="sr-only" for="home-search">{translations.searchText}</label>
+          <input id="home-search" name="q" type="search" placeholder={translations.searchText} />
+          <button type="submit">{translations.searchButton}</button>
+        </form>
+        <a class="text-link" href={localHref("/apps", currentLanguage)}>{translations.browseAllApps} <span aria-hidden="true">↗</span></a>
+      </div>
+      <aside class="catalog-facts">
+        <p class="eyebrow">{translations.inThisSnapshot}</p>
+        <div class="catalog-total"><strong>{allApps.length}</strong><span>{translations.appListings}</span></div>
+        <p class="catalog-category-total">{categories.length} {translations.categories.toLowerCase()}</p>
+        <div class="facts-note"><strong>{translations.configsNotApks}</strong><p>{translations.importNote}</p></div>
+      </aside>
+    </section>
+    <section class="catalog-section" aria-labelledby="category-heading">
+      <div class="section-heading"><h2 id="category-heading">{translations.browseByCategory}</h2><a class="text-link" href={localHref("/apps", currentLanguage)}>{translations.viewAll} <span aria-hidden="true">↗</span></a></div>
+      <div class="category-grid">
+        {categories.slice(0, 12).map(([category, count]) => <a class="category-tile" href={localHref("/apps?category=" + encodeURIComponent(category), currentLanguage)}><span>{translations[category] || category}</span><strong>{count}</strong></a>)}
+      </div>
+    </section>
+    <section class="catalog-section" aria-labelledby="example-heading">
+      <div class="section-heading"><div><h2 id="example-heading">{translations.fromTheCatalog}</h2><p>{translations.reviewSourceNote}</p></div></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">{examples.map(app => <AppCard app={app} translations={translations} currentLanguage={currentLanguage} />)}</div>
+    </section>
+    {popularApps.length > 0 && <section class="catalog-section" aria-labelledby="popular-heading"><div class="section-heading"><h2 id="popular-heading">{translations.popularLinkClicks}</h2></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4">{popularApps.map(app => <AppCard app={app} translations={translations} currentLanguage={currentLanguage} installCount={getAppInstallCount(app, installCounts)} />)}</div></section>}
+    <section class="catalog-help">
+      <h2>{translations.newToObtainium}</h2><p>{translations.obtainiumHelp}</p>
+      <a class="text-link" href="https://obtainium.imranr.dev/">{translations.getObtainium} <span aria-hidden="true">↗</span></a>
+    </section>
   </div>
 </Layout>

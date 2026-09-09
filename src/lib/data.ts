@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import type { SimpleApp, ComplexApp, Translations } from './types'
+import { isRecord, validateConfig } from './config'
 
 const DATA_DIR = path.join(process.cwd(), 'public/data')
 const APPS_DIR = path.join(DATA_DIR, '/apps')
@@ -47,6 +48,10 @@ export const getApps = (): (SimpleApp | ComplexApp)[] => {
     for (const filePath of files) {
       try {
         const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+        for (const config of data.configs || [data.config]) validateConfig(config)
+        if (data.configs && data.configs.length === 0) throw new Error('Empty configuration list')
+        if (data.categories && (!Array.isArray(data.categories) || !data.categories.every((cat: unknown) => typeof cat === 'string'))) throw new Error('Invalid categories')
+        if (data.description && (!isRecord(data.description) || Object.values(data.description).some(value => value !== null && typeof value !== 'string'))) throw new Error('Invalid description')
         const appBase = {
           icon: data.icon,
           categories: (data.categories as string[] | undefined || []).filter((cat: string) => cats.includes(cat)),
@@ -80,7 +85,8 @@ export const getApps = (): (SimpleApp | ComplexApp)[] => {
           })
         }
       } catch (e) {
-        console.error(`Error parsing ${filePath}`, e)
+        apps = []
+        throw new Error('Invalid catalog file: ' + path.relative(DATA_DIR, filePath), { cause: e })
       }
     }
 

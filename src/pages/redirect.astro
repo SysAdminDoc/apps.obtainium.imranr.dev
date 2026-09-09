@@ -1,232 +1,30 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { getCurrentLanguage, getLocalizedStrings } from "../lib/i18n";
-
-Astro.response.headers.set('Cache-Control', 'no-store');
-
+import { getCurrentLanguage, getLocalizedStrings, localHref } from "../lib/i18n";
+import { parseRedirect } from "../lib/config";
+Astro.response.headers.set("Cache-Control", "no-store");
 const currentLanguage = await getCurrentLanguage(Astro.url, Astro.request);
 const translations = getLocalizedStrings(currentLanguage);
-
-const url = Astro.url;
-const redirectUrl = url.searchParams.get("r");
-
-let isValid = false;
-let errorMessage = "";
-let appData: any = {};
-let parsedRedirectUrl = "";
-
-if (redirectUrl) {
-  try {
-    if (redirectUrl.startsWith("obtainium://app/")) {
-      const encodedData = redirectUrl.replace("obtainium://app/", "");
-      appData = JSON.parse(decodeURIComponent(encodedData));
-      parsedRedirectUrl =
-        "obtainium://app/" + encodeURIComponent(JSON.stringify(appData));
-      isValid = true;
-    } else if (redirectUrl.startsWith("obtainium://add/")) {
-      appData.url = decodeURIComponent(
-        redirectUrl.replace("obtainium://add/", ""),
-      );
-      const urlPattern = /^(http:\/\/|https:\/\/)/;
-      if (!urlPattern.test(appData.url)) {
-        throw new Error("Invalid URL format");
-      }
-      parsedRedirectUrl = "obtainium://add/" + appData.url;
-      isValid = true;
-    } else {
-      errorMessage = translations["invalidUrlPrefix"];
-    }
-  } catch (e) {
-    errorMessage = translations["invalidUrl"];
-  }
-} else {
-  errorMessage = translations["noRedirectParam"];
-}
+const result = parseRedirect(Astro.url.searchParams.get("r"));
+if ("error" in result && Astro.url.searchParams.has("r")) Astro.response.status = 400;
 ---
-
-<Layout>
-  <div class="container mx-auto px-4 py-6">
-    <div
-      class="max-w-md mx-auto bg-surface border border-border rounded-3xl p-6"
-    >
-      <!-- Page Title -->
-      <div class="text-center mb-6">
-        <div class="mb-3">
-          <div
-            class="w-12 h-12 mx-auto bg-primary-50/80 rounded-2xl flex items-center justify-center"
-          >
-            <svg
-              class="w-6 h-6 text-primary-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              aria-hidden="true"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z"
-                clip-rule="evenodd"></path>
-            </svg>
-          </div>
-        </div>
-        <h1 class="text-lg font-semibold text-text mb-1">
-          {translations["obtainiumRedirect"]}
-        </h1>
-        <p class="text-text-subtle text-sm">
-          {translations["redirectDescription"]}
-        </p>
-      </div>
-
-      <!-- Noscript Warning -->
-      <noscript>
-        <div
-          class="p-3 mb-4 bg-yellow-900/20 border border-yellow-800/40 rounded-xl text-yellow-400 text-sm"
-        >
-          <p>{translations["enableJavaScript"]}</p>
-        </div>
-      </noscript>
-
-      <!-- Error Message -->
-      {
-        errorMessage && (
-          <div class="p-3 mb-4 bg-red-900/20 border border-red-800/40 rounded-xl text-red-400 text-sm">
-            <p>{errorMessage}</p>
-          </div>
-        )
-      }
-
-      <!-- Redirecting Section -->
-      <div
-        id="redirecting"
-        class={`text-center ${isValid ? "" : "hidden"}`}
-        data-redirect-url={parsedRedirectUrl}
-      >
-        <div
-          class="p-5 mb-4 bg-surface-hover border border-border-hover rounded-2xl"
-        >
-          <div class="flex flex-col items-center">
-            <!-- Spinner -->
-            <div class="relative mb-3">
-              <div class="w-10 h-10 border-2 border-border-hover rounded-full">
-              </div>
-              <div
-                class="w-10 h-10 border-2 border-primary-400 border-t-transparent rounded-full animate-spin absolute top-0 left-0"
-              >
-              </div>
-            </div>
-
-            <!-- Redirecting Text -->
-            <p class="text-sm font-medium text-text mb-4">
-              {translations["redirecting"]}
-            </p>
-
-        <!-- Manual Redirect Button -->
-        <div id="intentBlocked" class="hidden p-3 mb-4 bg-yellow-900/20 border border-yellow-800/40 rounded-xl text-yellow-400 text-sm">
-          <p>{translations["intentBlockedHint"]}</p>
-        </div>
-        <a
-          id="redirectBtn"
-          href={parsedRedirectUrl}
-          class="w-full py-2.5 px-4 bg-primary-600 text-on-primary text-sm font-medium rounded-full hover:bg-primary-500 transition-colors duration-200"
-        >
-          {translations["clickToRedirect"]}
-        </a>
-          </div>
-        </div>
-
-        <!-- App Link -->
-        {
-          appData.url && (
-            <div class="mb-4 p-3 bg-surface-hover border border-border rounded-xl">
-              <p class="text-text-muted text-xs">
-                {translations["dontHaveObtainium"]}
-                <span class="font-medium text-text">
-                  {appData.name ? appData.name : `"${appData.url}"`}
-                </span>{" "}
-                {translations["manuallyFromHomePage"]}{" "}
-                <a
-                  id="appLinkHref"
-                  href={appData.url}
-                  class="text-primary-400 hover:text-primary-300 font-medium hover:underline transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {translations["here"]}
-                </a>
-                .
-              </p>
-            </div>
-          )
-        }
-
-        <!-- Download Link -->
-        <div class="mb-3">
-          <a
-            href="https://obtainium.imranr.dev/"
-            class="w-full inline-flex justify-center items-center py-2.5 px-4 border border-border-hover text-sm font-medium rounded-full text-text-secondary bg-surface-hover hover:bg-surface-alt hover:text-text hover:border-border transition-all duration-200"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {translations["downloadObtainium"]}
-          </a>
-        </div>
-
-        <!-- Home Link -->
-        <div>
-          <a
-            href="/"
-            class="w-full inline-flex justify-center items-center py-2.5 px-4 text-sm font-medium rounded-full text-text-subtle hover:text-text-secondary transition-colors duration-200"
-          >
-            {translations["browseAppList"]}
-          </a>
-        </div>
-      </div>
-
-      <!-- Instructions for invalid URL -->
-      {
-        !isValid && !errorMessage && (
-          <div class="text-center p-5 border border-border rounded-2xl bg-surface-hover">
-            <h3 class="text-sm font-semibold text-text mb-2">
-              {translations["howToUse"]}
-            </h3>
-            <p class="text-text-subtle text-sm mb-4">
-              {translations["redirectInstructions"]}
-            </p>
-            <div class="flex flex-col sm:flex-row gap-2 justify-center">
-              <a
-                href="/apps"
-                class="inline-flex justify-center items-center px-4 py-2.5 bg-primary-600 text-on-primary text-sm font-medium rounded-full hover:bg-primary-500 transition-colors duration-200"
-              >
-                {translations["browseApps"]}
-              </a>
-              <a
-                href="/"
-                class="inline-flex justify-center items-center px-4 py-2.5 border border-border-hover text-sm font-medium rounded-full text-text-secondary bg-surface-hover hover:bg-surface-alt hover:text-text transition-all duration-200"
-              >
-                {translations["goHome"]}
-              </a>
-            </div>
-          </div>
-        )
-      }
-    </div>
+<Layout title={translations.reviewConfiguration}>
+  <div class="container mx-auto px-5 py-10">
+    <section class="redirect-card">
+      <p class="eyebrow">OBTAINIUM</p>
+      {"error" in result ? <>
+        <h1>{translations.reviewConfiguration}</h1>
+        <p class="redirect-error" role="status">{translations[result.error] || translations.invalidUrl}</p>
+        <p>{translations.missingRedirectHelp}</p>
+      </> : <>
+        <p class="ready-label">{translations.configurationReady}</p>
+        <h1>{result.name}</h1>
+        <p>{translations.reviewBeforeImport}</p>
+        <div class="redirect-source"><span>{translations.sourceUrl}</span><a href={result.source} target="_blank" rel="noopener noreferrer">{result.source}</a></div>
+        <a class="primary-action" id="redirectBtn" href={result.href}>{translations.addToObtainium}</a>
+        <p class="redirect-note">{translations.redirectHelp}</p>
+      </>}
+      <div class="redirect-links"><a href="https://obtainium.imranr.dev/">{translations.getObtainium}</a><a href={localHref("/apps", currentLanguage)}>{translations.browseApps}</a></div>
+    </section>
   </div>
-  <script>
-    (function() {
-      const redirectingDiv = document.getElementById('redirecting');
-      if (!redirectingDiv) return;
-      const redirectUrl = redirectingDiv.dataset.redirectUrl;
-      if (!redirectUrl) return;
-      const hintEl = document.getElementById('intentBlocked');
-      let navigatedAway = false;
-      const markNavigated = () => { navigatedAway = true; };
-      window.addEventListener('blur', markNavigated);
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) markNavigated();
-      });
-      window.location.href = redirectUrl;
-      setTimeout(() => {
-        if (!navigatedAway && hintEl) hintEl.classList.remove('hidden');
-      }, 2000);
-    })();
-  </script>
 </Layout>

@@ -13,10 +13,9 @@ export default defineConfig({
   }),
   server: {
     port: 8080,
-    host: true
+    host: '127.0.0.1'
   },
   vite: {
-    // @ts-expect-error — @tailwindcss/vite plugin types lag behind Astro's bundled Vite
     plugins: [tailwindcss()]
   }
 });

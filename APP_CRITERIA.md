@@ -6,7 +6,7 @@
 
 </div>
 
-Before opening a new app request/PR with updates to a config, please read the following information to ensure that the app you want is suitable for this site. It will save you and the maintainers of the repo time. If you choose to ignore these instructions, your request/PR may be ignored.
+Read these criteria before requesting an app or changing a configuration. They are inherited from the upstream catalog. Links to upstream issues below are for the official service; changes to this fork belong in the SysAdminDoc repository.
 
 
 ### Before opening an app request:
@@ -15,9 +15,9 @@ Before opening a new app request/PR with updates to a config, please read the fo
 
 2. Search in both open AND closed issues to see if this app has already been requested by someone else.
 
-3. Forks of apps will not be accepted, unless both the package name and display name of the app has been changed. This is so people do not unknowingly download unofficial versions of apps.
+3. An app fork needs a different package name and display name so people can distinguish it from the original.
 
-4. Only configs from official sources from the app are accepted. This means reupload site (eg. APKPure, APKMirror etc...) configs will NOT be added.
+4. Use the app publisher's official source. Reupload sites such as APKPure and APKMirror aren't accepted.
 
 
 If you've gone through the above steps, then you can [open an app request](https://github.com/ImranR98/apps.obtainium.imranr.dev/issues). Make sure to include at a minimum:
@@ -30,9 +30,9 @@ If you've gone through the above steps, then you can [open an app request](https
 
 1. Search in both open AND closed PRs to see if someone has already tried to add the app at some point, and if it was declined, the reason why.
 
-2. Forks of apps will not be accepted, unless both the package name and display name of the app has been changed. This is so people do not unknowingly download unofficial versions of apps.
+2. An app fork needs a different package name and display name so people can distinguish it from the original.
 
-3. Only configs from official sources from the app are accepted. This means reupload site (eg. APKPure, APKMirror etc...) configs will NOT be added.
+3. Use the app publisher's official source. Reupload sites such as APKPure and APKMirror aren't accepted.
 
 If you've gone through the above steps, then you can open a PR. Keep these things in mind:
 

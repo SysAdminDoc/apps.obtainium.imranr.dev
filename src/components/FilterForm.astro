@@ -1,6 +1,10 @@
 ---
+import { hasLinkStats } from '../lib/stats';
 export interface Props {
   translations: Record<string, string>;
+  currentLanguage: string;
+  type: 'simple' | 'complex' | 'both';
+  limit: number;
   allCategories: string[];
   categories: string[];
   categoryMode: "inclusive" | "exclusive";
@@ -8,19 +12,24 @@ export interface Props {
   sort?: "name" | "popular" | "relevance";
 }
 
-const { translations, allCategories, categories, categoryMode, q, sort = "popular" } =
+const { translations, allCategories, categories, categoryMode, q, currentLanguage, type, limit, sort = "name" } =
   Astro.props as Props;
 ---
 
 <form
   method="get"
   action="/apps"
-  class="bg-surface border border-border rounded-3xl p-5 mb-6"
+  class="bg-surface border border-border rounded-2xl p-5 mb-6"
   role="search"
   aria-label="Filter apps"
 >
+  <input type="hidden" name="lang" value={currentLanguage} />
+  <input type="hidden" name="type" value={type} />
+  <input type="hidden" name="limit" value={limit} />
   <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
-    <div class="lg:col-span-2">
+    <details class="category-filter lg:col-span-2" open>
+      <summary>{translations.categories}{categories.length > 0 && " (" + categories.length + ")"}</summary>
+      <div class="category-filter-content">
       <div class="flex items-center justify-between mb-2">
         <label class="text-text-secondary text-sm font-medium"
           >{translations["categorySelect"]}</label
@@ -80,7 +89,8 @@ const { translations, allCategories, categories, categoryMode, q, sort = "popula
           {translations["deselectAll"]}
         </button>
       </div>
-    </div>
+      </div>
+    </details>
 
     <div class="lg:col-span-2 flex flex-col justify-between">
       <div class="mb-3">
@@ -95,9 +105,9 @@ const { translations, allCategories, categories, categoryMode, q, sort = "popula
           <option value="name" selected={sort === "name"} class="px-2 py-1.5 rounded-md">
             {translations["sortName"]}
           </option>
-          <option value="popular" selected={sort === "popular"} class="px-2 py-1.5 rounded-md">
+          {hasLinkStats() && <option value="popular" selected={sort === "popular"} class="px-2 py-1.5 rounded-md">
             {translations["sortPopular"]}
-          </option>
+          </option>}
           <option value="relevance" selected={sort === "relevance"} class="px-2 py-1.5 rounded-md">
             {translations["sortRelevance"]}
           </option>
@@ -105,7 +115,7 @@ const { translations, allCategories, categories, categoryMode, q, sort = "popula
       </div>
       <div class="mb-3">
         <label class="block text-text-secondary text-sm font-medium mb-1.5"
-          >{translations["search"]}</label
+          >{translations["searchText"]}</label
         >
         <div class="relative">
           <div
@@ -129,7 +139,7 @@ const { translations, allCategories, categories, categoryMode, q, sort = "popula
             type="search"
             name="q"
             value={q}
-            placeholder={translations["search"]}
+            placeholder={translations["searchText"]}
             class="w-full pl-10 pr-3 py-2 bg-surface-alt border border-border-hover rounded-xl text-text-secondary placeholder-text-subtle text-sm focus:outline-none focus:ring-1 focus:ring-primary-400 focus:border-primary-400 [&::-webkit-search-cancel-button]:hidden"
           />
         </div>
@@ -137,9 +147,9 @@ const { translations, allCategories, categories, categoryMode, q, sort = "popula
       <div>
         <button
           type="submit"
-          class="w-full px-4 py-2.5 bg-primary-600 text-on-primary text-sm font-medium rounded-full hover:bg-primary-500 transition-colors duration-200"
+          class="w-full px-4 py-2.5 bg-primary-600 text-on-primary text-sm font-medium rounded-lg hover:bg-primary-500 transition-colors duration-200"
         >
-          {translations["go"]}
+          {translations["searchButton"]}
         </button>
       </div>
     </div>
@@ -148,20 +158,8 @@ const { translations, allCategories, categories, categoryMode, q, sort = "popula
 
 <script is:inline>
   (() => {
-    const searchInput = document.querySelector('input[name="q"]');
-    if (searchInput) {
-      document.addEventListener('keydown', (e) => {
-        if (
-          e.key === '/' &&
-          document.activeElement !== searchInput &&
-          !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')
-        ) {
-          e.preventDefault();
-          searchInput.focus();
-        }
-      });
-    }
-
+    const categoryPanel = document.querySelector('.category-filter');
+    if (categoryPanel && window.matchMedia('(max-width: 600px)').matches) categoryPanel.open = false;
     const categorySelect = document.querySelector('select[name="category"]');
     const sortSelect = document.querySelector('select[name="sort"]');
     const selectAllBtn = document.querySelector('[data-select-all]');
@@ -186,7 +184,7 @@ const { translations, allCategories, categories, categoryMode, q, sort = "popula
       const defaultSortForSelection = () => {
         const selected = Array.from(categorySelect.options).filter((o) => o.selected).length;
         const total = categorySelect.options.length;
-        return selected <= 1 || selected >= total ? 'popular' : 'relevance';
+        return selected <= 1 || selected >= total ? (sortSelect.querySelector('option[value="popular"]') ? 'popular' : 'name') : 'relevance';
       };
       categorySelect.addEventListener('change', () => {
         if (!userTouchedSort) {
@@ -195,12 +193,5 @@ const { translations, allCategories, categories, categoryMode, q, sort = "popula
       });
     }
 
-    if (searchInput) {
-      const params = new URLSearchParams(window.location.search);
-      const isFreshBrowse = !params.has('q') && !params.has('category') && !params.has('categories') && !params.has('page');
-      if (isFreshBrowse && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        setTimeout(() => searchInput.focus({ preventScroll: true }), 100);
-      }
-    }
   })();
 </script>

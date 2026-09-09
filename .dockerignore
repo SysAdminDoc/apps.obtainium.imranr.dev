@@ -2,6 +2,14 @@ node_modules
 npm-debug.log
 dist
 .env
+.env.*
+!.env.example
+CLAUDE.md
+CODEX_CHANGELOG.md
+.claude
+release
+.review
+assets/concepts
 .DS_Store
 .git
 .gitignore

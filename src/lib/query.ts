@@ -1,7 +1,7 @@
 import { getApps } from './data'
 import type { SimpleApp, ComplexApp, QueryOptions, PaginatedResult, SimpleAppConfig, ComplexAppConfig } from './types'
 import { pickLocalTranslation } from './i18n'
-import { getInstallCounts, getAppInstallCount } from './stats'
+import { getInstallCounts, getAppInstallCount, hasLinkStats } from './stats'
 
 function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -32,10 +32,10 @@ export const getAppConfigString = (
         if (!settings.about) settings.about = description
         config.additionalSettings = JSON.stringify(settings)
       } catch (e) {
-        console.error(config)
+        throw new Error('Invalid additionalSettings during configuration export', { cause: e })
       }
     }
-    if (config.altLabel) delete config.altLabel
+    delete config.altLabel
     return JSON.stringify(config)
   }
   return JSON.stringify(app.config)
@@ -46,18 +46,20 @@ export const getAppConfigString = (
  */
 export const extractAppParamsFromRequest = async (request: Request): Promise<QueryOptions> => {
   const url = new URL(request.url)
-  const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'))
-  const limit = Math.min(200, Math.max(1, parseInt(url.searchParams.get('limit') || '50')))
-  const categories = (
+  const positiveInt = (value: string | null, fallback: number, max: number) => value !== null && /^\d+$/.test(value) ? Math.min(max, Math.max(1, Number(value))) : fallback
+  const page = positiveInt(url.searchParams.get('page'), 1, 1000000)
+  const limit = positiveInt(url.searchParams.get('limit'), 50, 200)
+  const categories = [...new Set((
     url.searchParams.get("categories")?.split(",") ||
     url.searchParams.getAll("category")
-  ).filter((c) => c.trim() !== "")
-  const categoryMode = (url.searchParams.get('categoryMode') as 'inclusive' | 'exclusive') || 'inclusive'
-  const type = (url.searchParams.get('type') as 'simple' | 'complex' | 'both') || 'both'
-  const q = url.searchParams.get('q') || ''
+  ).map(c => c.trim()).filter(Boolean))].slice(0, 64)
+  const categoryMode = url.searchParams.get('categoryMode') === 'exclusive' ? 'exclusive' : 'inclusive'
+  const requestedType = url.searchParams.get('type')
+  const type = requestedType === 'simple' || requestedType === 'complex' ? requestedType : 'both'
+  const q = (url.searchParams.get('q') || '').slice(0, 500)
   const explicitSort = url.searchParams.get('sort')
   const sort = explicitSort === 'name' || explicitSort === 'popular' || explicitSort === 'relevance'
-    ? explicitSort
+    ? (explicitSort === 'popular' && !hasLinkStats() ? 'name' : explicitSort)
     : getDefaultSort(categories)
   return {
     categories: categories,
@@ -75,12 +77,12 @@ export const extractAppParamsFromRequest = async (request: Request): Promise<Que
  * relevance otherwise (sorts by category match count).
  * The category set mirrors what the filter form offers (categories present on apps).
  */
-export const getDefaultSort = (categories: string[]): 'popular' | 'relevance' => {
+export const getDefaultSort = (categories: string[]): 'name' | 'popular' | 'relevance' => {
   if (categories.length <= 1) {
-    return 'popular'
+    return hasLinkStats() ? 'popular' : 'name'
   }
   const totalCategories = new Set(getApps().flatMap((app) => app.categories)).size
-  return categories.length >= totalCategories ? 'popular' : 'relevance'
+  return categories.length >= totalCategories ? (hasLinkStats() ? 'popular' : 'name') : 'relevance'
 }
 
 /**
@@ -94,7 +96,7 @@ export const queryAppsAsync = async (options: QueryOptions): Promise<PaginatedRe
     q = '',
     page = 1,
     limit = 50,
-    sort = 'popular'
+    sort = 'name'
   } = options
 
   const apps = getApps()
@@ -143,7 +145,9 @@ export const queryAppsAsync = async (options: QueryOptions): Promise<PaginatedRe
   }
 
   const total = filteredApps.length
-  const start = (page - 1) * limit
+  const totalPages = Math.ceil(total / limit)
+  const currentPage = Math.min(Math.max(1, page), Math.max(1, totalPages))
+  const start = (currentPage - 1) * limit
   const end = start + limit
   const paginatedApps = filteredApps.slice(start, end)
 
@@ -161,10 +165,10 @@ export const queryAppsAsync = async (options: QueryOptions): Promise<PaginatedRe
   return {
     apps: paginatedApps,
     pagination: {
-      page,
+      page: currentPage,
       limit,
       total,
-      totalPages: Math.ceil(total / limit)
+      totalPages
     },
     letterPages
   }

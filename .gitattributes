@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.png binary
+*.zip binary
+assets/concepts/2026-09-09-marketing/originals/** -text

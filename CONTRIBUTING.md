@@ -6,8 +6,11 @@
 
 # Contributing
 
+This is SysAdminDoc's fork. Send changes for this copy to [this repository](https://github.com/SysAdminDoc/apps.obtainium.imranr.dev/pulls). To update the official hosted catalog, contribute to [upstream](https://github.com/ImranR98/apps.obtainium.imranr.dev) instead.
+
 - To contribute content, create a [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) with valid changes/additions to any files in the repo.
-- To test locally, run: `npm run dev` (you should have Node 22 installed, run `npm i` once to install dependencies).
+- Install Node.js 22.12 or newer and run `npm ci`, then `npm run dev` to test locally.
+- Before submitting, run `npm run validate`, `npm test`, `npm run typecheck` and `npm run build`. Local data validation doesn't contact app sources or modify records.
 - See https://github.com/ImranR98/Obtainium/issues/1214 for background/context for this repo.
 
 
@@ -26,15 +29,15 @@
 
 Config files must be placed in the `public/data/apps/` directory:
 
-- `public/data/apps/complex/<package-id>.json` — apps that need custom settings (an app using `additionalSettings`, a non-default source, or multiple variants). These use a `configs` array.
-- `public/data/apps/simple/<package-id>.json` — apps that work with default settings only (e.g. a plain GitHub source). These use a single `config` object.
+- `public/data/apps/complex/<package-id>.json` is for apps with custom settings, a non-default source or multiple variants. These use a `configs` array.
+- `public/data/apps/simple/<package-id>.json` is for apps that work with default settings, such as a plain GitHub source. These use a single `config` object.
 
-Do not put config files anywhere else (e.g. a top-level `data/` directory) — files outside `public/data/apps/` are not loaded by the website.
+Use a `.json` filename inside `public/data/apps/`. Files elsewhere, including a top-level `data/` directory, aren't loaded. Extensionless files aren't loaded either.
 
 
 ### Minimal Example
 
-To add an app config to this repo, your app configuration JSON must contain at least the `id`, `url`, `author`, und `name` keys. Note that for any app-specific setting you don't define in `additionalSettings`, the default value will be used.
+Each configuration needs `id`, `url`, `author` and `name`. Settings omitted from `additionalSettings` use Obtainium's defaults. Keep the source URL public and free of credentials. `additionalSettings` is a JSON-encoded string, so both layers must parse correctly.
 
 For example:
 - Minimal app JSON: `{"id":"dev.patrickgold.florisboard.beta","url":"https://github.com/florisboard/florisboard","author":"florisboard","name":"FlorisBoard Beta","additionalSettings":"{\"includePrereleases\":true}"}`
@@ -44,8 +47,11 @@ For example:
 
 # Beitragen
 
+Dies ist der Fork von SysAdminDoc. Änderungen an dieser Kopie gehören in dieses Repository. Änderungen am offiziellen Katalog reichen Sie bitte bei [Upstream](https://github.com/ImranR98/apps.obtainium.imranr.dev) ein.
+
 - Um Inhalte beizusteuern, erstellen Sie einen [Pull-Request](https://docs.github.com/de/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) mit gültigen Änderungen/Ergänzungen zu allen Dateien im Repo.
-- Um Ihre Änderungen lokal zu testen, führen Sie bitte `npm run dev` aus
+- Installieren Sie Node.js 22.12 oder neuer. Führen Sie `npm ci` und anschließend `npm run dev` aus.
+- Prüfen Sie Änderungen mit `npm run validate`, `npm test`, `npm run typecheck` und `npm run build`. Die lokale Datenprüfung verändert keine Einträge und ruft keine App-Quellen auf.
 - Siehe https://github.com/ImranR98/Obtainium/issues/1214 für den Hintergrund/Kontext für dieses Repo.
 
 
@@ -64,10 +70,10 @@ For example:
 
 Konfigurationsdateien müssen im Verzeichnis `public/data/apps/` abgelegt werden:
 
-- `public/data/apps/complex/<package-id>.json` — für Apps, die benutzerdefinierte Einstellungen benötigen (eine App mit `additionalSettings`, einer nicht standardmäßigen Quelle oder mehreren Varianten). Diese verwenden ein `configs`-Array.
-- `public/data/apps/simple/<package-id>.json` — für Apps, die nur mit Standardeinstellungen funktionieren (z. B. eine einfache GitHub-Quelle). Diese verwenden ein einzelnes `config`-Objekt.
+- `public/data/apps/complex/<package-id>.json` ist für Apps mit benutzerdefinierten Einstellungen, einer nicht standardmäßigen Quelle oder mehreren Varianten. Diese verwenden ein `configs`-Array.
+- `public/data/apps/simple/<package-id>.json` ist für Apps, die mit Standardeinstellungen funktionieren, etwa einer einfachen GitHub-Quelle. Diese verwenden ein einzelnes `config`-Objekt.
 
-Legen Sie Konfigurationsdateien nicht an anderen Orten ab (z. B. in einem `data`-Verzeichnis auf oberster Ebene) — Dateien außerhalb von `public/data/apps/` werden von der Website nicht geladen.
+Verwenden Sie die Endung `.json` innerhalb von `public/data/apps/`. Dateien an anderen Orten, etwa in einem `data`-Verzeichnis auf oberster Ebene, werden nicht geladen. Das gilt auch für Dateien ohne Endung.
 
 
 ### Minimalbeispiel

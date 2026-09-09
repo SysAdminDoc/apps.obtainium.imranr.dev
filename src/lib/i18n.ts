@@ -12,14 +12,15 @@ export const getCurrentLanguage = async (url: URL, request: Request) => {
     const preferred = browserLangHeader.split(',')[0]
     browserLang = preferred.split(';')[0].trim().split('-')[0].toLowerCase()
   }
-  return langParam || browserLang || 'en'
+  const requested = (langParam || browserLang).toLowerCase().split('-')[0]
+  return ['en', 'fa', 'ru', 'de', 'ja', 'zh'].includes(requested) ? requested : 'en'
 }
 
 /**
  * Pick translation from language object with fallback
  */
 export const pickLocalTranslation = (langObj: Translation, language: string): string | null => {
-  if (langObj[language]) {
+  if (Object.hasOwn(langObj, language) && langObj[language]) {
     return langObj[language]!
   }
   if (language !== 'en' && langObj.en) {
@@ -33,14 +34,13 @@ export const pickLocalTranslation = (langObj: Translation, language: string): st
   return null
 }
 
-const translationCache: { [key: string]: { [key: string]: string } } = {}
+const translationCache = new Map<string, Record<string, string>>()
 /**
  * Get localized strings for a given language with caching
  */
 export const getLocalizedStrings = (language: string) => {
-  if (translationCache[language]) {
-    return translationCache[language]
-  }
+  const cached = translationCache.get(language)
+  if (cached) return cached
   const thisLang: { [key: string]: string } = {}
   let atLeastOne = false
   const cats = getCategories()
@@ -60,7 +60,13 @@ export const getLocalizedStrings = (language: string) => {
     thisLang[s] = tr || s
   }
   if (atLeastOne) {
-    translationCache[language] = thisLang
+    translationCache.set(language, thisLang)
   }
   return thisLang
+}
+
+export const localHref = (href: string, language: string) => {
+  const url = new URL(href, 'http://localhost')
+  url.searchParams.set('lang', language)
+  return url.pathname + url.search + url.hash
 }

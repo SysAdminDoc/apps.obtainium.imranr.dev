@@ -21,7 +21,7 @@ const appConfigs = getAppConfig(app);
 {
   compact ? (
     <div
-      class="group relative bg-surface border border-border rounded-3xl p-3 hover:border-border-hover transition-all duration-200 flex items-center gap-3"
+      class="group relative bg-surface border border-border rounded-2xl p-3 hover:border-border-hover transition-all duration-200 flex items-center gap-3"
     >
       <Icon
         src={app.icon}
@@ -31,7 +31,7 @@ const appConfigs = getAppConfig(app);
         className="rounded-xl shrink-0"
       />
       <div class="min-w-0 flex-1">
-        <h3 class="text-sm font-semibold text-text truncate">
+        <h3 class="text-base font-semibold text-text break-words">
           <a
             href={appConfigs[0].url}
             class="hover:text-primary-500 transition-colors"
@@ -39,22 +39,22 @@ const appConfigs = getAppConfig(app);
           >
         </h3>
         <p class="text-text-subtle text-xs truncate">
-          by {appConfigs[0].author}
+          {appConfigs[0].author}
         </p>
       </div>
       {installCount > 0 && (
         <span class="text-text-muted text-xs font-medium whitespace-nowrap">
           {new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(installCount)}
-          {" "}{translations["monthlyInstalls"]}
+          {" "}{translations["monthlyLinkClicks"]}
         </span>
       )}
       {
         appConfigs.length > 1 ? (
           <details class="variant-picker relative shrink-0">
             <summary
-              class="cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none px-3 py-1.5 bg-primary-600 text-on-primary text-xs font-medium rounded-full hover:bg-primary-500 transition-colors duration-200 text-center"
+              class="cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none px-3 py-1.5 bg-primary-600 text-on-primary text-xs font-medium rounded-lg hover:bg-primary-500 transition-colors duration-200 text-center"
             >
-              {translations["install"]}
+              {translations["addToObtainium"]}
             </summary>
             <div
               class="absolute right-0 top-full mt-2 z-20 w-64 bg-surface border border-border rounded-2xl p-2 shadow-xl"
@@ -77,17 +77,17 @@ const appConfigs = getAppConfig(app);
           </details>
         ) : (
           <a
-            class="shrink-0 px-3 py-1.5 bg-primary-600 text-on-primary text-xs font-medium rounded-full hover:bg-primary-500 transition-colors duration-200 text-center"
+            class="shrink-0 px-3 py-1.5 bg-primary-600 text-on-primary text-xs font-medium rounded-lg hover:bg-primary-500 transition-colors duration-200 text-center"
             href={`obtainium://app/${encodeURIComponent(getAppConfigString(app, currentLanguage, 0))}`}
           >
-            {translations["install"]}
+            {translations["addToObtainium"]}
           </a>
         )
       }
     </div>
   ) : (
     <div
-      class="group relative bg-surface border border-border rounded-3xl p-4 hover:border-border-hover transition-all duration-200 flex flex-col h-full"
+      class="app-card group relative bg-surface border border-border rounded-2xl p-4 hover:border-border-hover transition-all duration-200 flex flex-col h-full"
     >
   <div class="flex items-start mb-3">
     <Icon
@@ -98,15 +98,16 @@ const appConfigs = getAppConfig(app);
       className="mr-3 rounded-xl"
     />
     <div class="min-w-0 flex-1">
-      <h3 class="text-sm font-semibold text-text truncate">
+      <h3 class="text-base font-semibold text-text break-words">
         <a
           href={appConfigs[0].url}
           class="hover:text-primary-500 transition-colors"
           >{appConfigs[0].name}</a
         >
       </h3>
-      <p class="text-text-subtle text-xs truncate mt-0.5">
-        by {appConfigs[0].author}
+      <p class="text-text-subtle text-xs mt-0.5">
+        {appConfigs[0].author}
+        <a href={appConfigs[0].url} aria-label={translations.source + ": " + appConfigs[0].name} class="card-source-link">{translations.source} <span aria-hidden="true">↗</span></a>
       </p>
     </div>
     {appConfigs.length > 1 && (appConfigs[0] as ComplexAppConfig).altLabel && (
@@ -118,7 +119,7 @@ const appConfigs = getAppConfig(app);
     )}
   </div>
 
-  <p class="text-text-muted text-sm mb-3 line-clamp-2">
+  <p class="text-text-muted text-sm mb-3 line-clamp-3">
     {pickLocalTranslation(app.description, currentLanguage)}
   </p>
 
@@ -140,22 +141,22 @@ const appConfigs = getAppConfig(app);
         <svg class="w-4 h-4 mr-1.5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
         </svg>
-        <span class="text-xs font-medium">{new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(installCount)} {translations["monthlyInstalls"]}</span>
+        <span class="text-xs font-medium">{new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(installCount)} {translations["monthlyLinkClicks"]}</span>
       </div>
     )}
     <div class="flex gap-2">
       <button
         type="button"
-        class="jsonly flex-1 px-3 py-2 bg-surface-hover text-text-secondary text-sm font-medium rounded-full hover:bg-surface-alt transition-colors duration-200"
+        class="jsonly flex-1 px-3 py-2 bg-surface-hover text-text-secondary text-sm font-medium rounded-lg hover:bg-surface-alt transition-colors duration-200"
         onclick={`copyToClipboard(${JSON.stringify(getAppConfigString(app, currentLanguage, 0))})`}
       >
-        {translations["copy"]}
+        {translations["copyJson"]}
       </button>
       <a
-        class="flex-1 px-3 py-2 bg-primary-600 text-on-primary text-sm font-medium rounded-full hover:bg-primary-500 transition-colors duration-200 text-center"
+        class="flex-1 px-3 py-2 bg-primary-600 text-on-primary text-sm font-medium rounded-lg hover:bg-primary-500 transition-colors duration-200 text-center"
         href={`obtainium://app/${encodeURIComponent(getAppConfigString(app, currentLanguage, 0))}`}
       >
-        {translations["install"]}
+        {translations["addToObtainium"]}
       </a>
     </div>
     {appConfigs.length > 1 && (
@@ -170,16 +171,16 @@ const appConfigs = getAppConfig(app);
             <div class="flex gap-1.5">
               <button
                 type="button"
-                class="jsonly px-2.5 py-1.5 bg-surface-hover text-text-secondary text-xs font-medium rounded-full hover:bg-surface-alt transition-colors duration-200"
+                class="jsonly px-2.5 py-1.5 bg-surface-hover text-text-secondary text-xs font-medium rounded-lg hover:bg-surface-alt transition-colors duration-200"
                 onclick={`copyToClipboard(${JSON.stringify(getAppConfigString(app, currentLanguage, index + 1))})`}
               >
-                {translations["copy"]}
+                {translations["copyJson"]}
               </button>
               <a
-                class="px-2.5 py-1.5 bg-primary-600 text-on-primary text-xs font-medium rounded-full hover:bg-primary-500 transition-colors duration-200"
+                class="px-2.5 py-1.5 bg-primary-600 text-on-primary text-xs font-medium rounded-lg hover:bg-primary-500 transition-colors duration-200"
                 href={`obtainium://app/${encodeURIComponent(getAppConfigString(app, currentLanguage, index + 1))}`}
               >
-                {translations["install"]}
+                {translations["addToObtainium"]}
               </a>
             </div>
           </div>

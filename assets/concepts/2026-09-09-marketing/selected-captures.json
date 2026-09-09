@@ -1,0 +1,67 @@
+{
+  "review": "app-r5 and app-r6",
+  "screenshots": [
+    {
+      "path": "assets/screenshots/home-dark.png",
+      "origin": "assets/concepts/2026-09-09-marketing/app-r5/home-dark.png",
+      "sha256": "f2681ef2f96bb09675737fd15b5f2adccd6d77aff950526d4f38b540ea824ab8",
+      "width": 1440,
+      "height": 1160,
+      "retouched": false
+    },
+    {
+      "path": "assets/screenshots/catalog-dark.png",
+      "origin": "assets/concepts/2026-09-09-marketing/app-r6/catalog-dark.png",
+      "sha256": "ad4f518b09c789d8d5500cb653e6df42bef71def2d1e38f7048620c0b8e4a140",
+      "width": 1440,
+      "height": 1200,
+      "retouched": false
+    },
+    {
+      "path": "assets/screenshots/variants-light.png",
+      "origin": "assets/concepts/2026-09-09-marketing/app-r5/variants-light.png",
+      "sha256": "53a0e144398983b8697847feac09072a7ff5c0c8281b045c41cd3445140921ba",
+      "width": 1440,
+      "height": 1050,
+      "retouched": false
+    },
+    {
+      "path": "assets/screenshots/catalog-mobile.png",
+      "origin": "assets/concepts/2026-09-09-marketing/app-r5/catalog-mobile.png",
+      "sha256": "7cbebe0e48e5b7a8a2539782cfd80ae4f46b74b6ce429a47f7a3ab87ac91a782",
+      "width": 390,
+      "height": 950,
+      "retouched": false
+    },
+    {
+      "path": "assets/screenshots/home-light.png",
+      "origin": "assets/concepts/2026-09-09-marketing/app-r5/home-light.png",
+      "sha256": "f83a3b151617f421c68242908a7f924edb7d833b9af7477dbdd20ffe6268f6c0",
+      "width": 1440,
+      "height": 1160,
+      "retouched": false
+    }
+  ],
+  "identity": {
+    "path": "public/favicon.png",
+    "decision": "Retain upstream mark with explicit fork attribution",
+    "sha256": "1e4fbffef4404351954915a27562e3433598fa4a4fa7ca4e9f894ee053980cdf",
+    "width": 72,
+    "height": 72,
+    "channels": 4,
+    "cornerAlpha": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "socialCard": {
+    "path": "public/social-card.png",
+    "origin": "assets/concepts/2026-09-09-marketing/documents-r2/social-card-dark.png",
+    "sha256": "db885be7fb362badacaf5ecbd1d10a597ed412dc76b7febd633b0153fa003d20",
+    "width": 1280,
+    "height": 640,
+    "decision": "Selected dark composition; light alternative remains in the archive"
+  }
+}
