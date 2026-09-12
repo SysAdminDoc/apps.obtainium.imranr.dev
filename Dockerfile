@@ -17,5 +17,5 @@ USER node
 EXPOSE 8080
 CMD ["node", "dist/server/entry.mjs"]
 
-# docker build -t obtainium-apps:0.0.2 .
-# docker run --rm -p 127.0.0.1:8080:8080 obtainium-apps:0.0.2
+# docker build -t obtainium-apps:0.0.3 .
+# docker run --rm -p 127.0.0.1:8080:8080 obtainium-apps:0.0.3

@@ -1,4 +1,4 @@
-# Host Obtainium Apps v0.0.2
+# Host Obtainium Apps v0.0.3
 
 This fork runs as a Node.js website. It doesn't contain the Obtainium Android app or any APKs. The official catalog at apps.obtainium.imranr.dev is a separate upstream service.
 

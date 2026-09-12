@@ -1,6 +1,8 @@
+![Obtainium Apps configuration catalog marketing hero](public/social-card.png)
+
 # Obtainium Apps
 
-[![Version](https://img.shields.io/badge/version-0.0.2-8b6bc4)](https://github.com/SysAdminDoc/apps.obtainium.imranr.dev/releases/latest) [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE) ![Platform](https://img.shields.io/badge/platform-Web%20%2B%20Node.js-526a9d)
+[![Version](https://img.shields.io/badge/version-0.0.3-8b6bc4)](https://github.com/SysAdminDoc/apps.obtainium.imranr.dev/releases/latest) [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE) ![Platform](https://img.shields.io/badge/platform-Web%20%2B%20Node.js-526a9d)
 
 **Find an app's configuration. Hand it to Obtainium.**
 

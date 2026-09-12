@@ -1,5 +1,10 @@
 # Changelog
 
+## Obtainium Apps v0.0.3 (2026-09-12)
+
+- Put the reviewed catalog hero at the top of the README so visitors can see the product before reading setup details.
+- Removed the release number from the hero and added a check that keeps the artwork evergreen.
+
 ## Obtainium Apps v0.0.2 (2026-09-09)
 
 The fork now has its own README and a clearer catalog homepage, with the upstream identity and GPL license retained. Real website captures and the complete original source are kept in the marketing concept archive.

@@ -58,10 +58,10 @@
   },
   "socialCard": {
     "path": "public/social-card.png",
-    "origin": "assets/concepts/2026-09-09-marketing/documents-r2/social-card-dark.png",
-    "sha256": "db885be7fb362badacaf5ecbd1d10a597ed412dc76b7febd633b0153fa003d20",
+    "origin": "assets/concepts/2026-09-09-marketing/documents-r4/social-card-dark.png",
+    "sha256": "864585bccf02c6b8c193da5483c55b7615c4ae89c772dbd2b09a539322405d23",
     "width": 1280,
     "height": 640,
-    "decision": "Selected dark composition; light alternative remains in the archive"
+    "decision": "Selected evergreen dark composition without release text; light alternative remains in the archive"
   }
 }

@@ -10,6 +10,17 @@ import { promisify } from 'node:util'
 const exec = promisify(execFile)
 const root = process.cwd()
 
+test('README opens with an evergreen marketing hero', () => {
+  const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8')
+  const source = fs.readFileSync(path.join(root, 'assets/marketing/social-card.html'), 'utf8')
+  const hero = fs.readFileSync(path.join(root, 'public/social-card.png'))
+  assert.match(readme, /^!\[Obtainium Apps configuration catalog marketing hero\]\(public\/social-card\.png\)/)
+  assert.doesNotMatch(source, /\bv\d+\.\d+\.\d+\b/)
+  assert.deepEqual([...hero.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
+  assert.equal(hero.readUInt32BE(16), 1280)
+  assert.equal(hero.readUInt32BE(20), 640)
+})
+
 test('failed icon checks are read-only by default and report a failing status', async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'obtainium-icon-test-'))
   const server = http.createServer((_request, response) => { response.writeHead(404); response.end('Not found'); })

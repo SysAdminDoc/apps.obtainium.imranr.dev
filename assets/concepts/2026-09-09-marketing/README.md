@@ -8,7 +8,7 @@ The original Obtainium icon is retained unchanged. It is the upstream project's 
 
 The selected screenshots are actual browser captures of this fork running its bundled catalog. No app rows, counts or controls were painted into the images. [selected-captures.json](selected-captures.json) records their source files and hashes. The Android application wasn't photographed or simulated.
 
-The [dark share card](documents-r2/social-card-dark.png) is selected for the website's preview metadata. The [light alternative](documents-r2/social-card-light.png) remains available. Both use a real homepage capture and the original icon. Editable layout source is in [social-card.html](../../marketing/social-card.html).
+The evergreen [dark share card](documents-r4/social-card-dark.png) is selected for the website's preview metadata and README hero. The [light alternative](documents-r4/social-card-light.png) remains available. Both use a real homepage capture and the original icon. Editable layout source is in [social-card.html](../../marketing/social-card.html).
 
 ## Preserved review history
 
@@ -24,6 +24,8 @@ The [dark share card](documents-r2/social-card-dark.png) is selected for the web
 | [app-r6](app-r6) | Selected dark catalog capture shows Firefox architecture variants and pagination. All 42 checks pass. |
 | [documents-r1](documents-r1) | First identity, share-card and README previews. Not selected: the share-card frame touched the footer and README badges stacked vertically. |
 | [documents-r2](documents-r2) | Corrected spacing, inline badges and reviewed dark/light/mobile README layouts. |
+| [documents-r3](documents-r3) | First evergreen-card capture. The README review stopped when its local renderer didn't serve the new public hero path. The successful card captures are retained. |
+| [documents-r4](documents-r4) | Selected evergreen card and verified dark, light and mobile README layouts with every local image loaded. |
 | [package-r1](package-r1) | A fresh installation of the extracted Node server package passes all 42 browser checks. Twelve actual captures preserve the package review. |
 
 The first screenshot selection is also retained in `selected-captures-initial.json`. The final catalog image replaces the file-sharing example because its inherited German-only description was a weaker English-language introduction. The old capture remains intact.
