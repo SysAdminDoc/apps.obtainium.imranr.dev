@@ -14,7 +14,9 @@ test('README opens with an evergreen marketing hero', () => {
   const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8')
   const source = fs.readFileSync(path.join(root, 'assets/marketing/social-card.html'), 'utf8')
   const hero = fs.readFileSync(path.join(root, 'public/social-card.png'))
-  assert.match(readme, /^!\[Obtainium Apps configuration catalog marketing hero\]\(public\/social-card\.png\)/)
+  const heroReference = '![Obtainium Apps configuration catalog marketing hero](public/social-card.png)'
+  assert.ok(readme.startsWith(heroReference))
+  assert.equal(readme.split(heroReference).length - 1, 1)
   assert.doesNotMatch(source, /\bv\d+\.\d+\.\d+\b/)
   assert.deepEqual([...hero.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10])
   assert.equal(hero.readUInt32BE(16), 1280)
